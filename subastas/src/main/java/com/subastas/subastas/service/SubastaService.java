@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,9 @@ public class SubastaService {
     private final NotificacionService notificacionService;
 
     public SubastaResponseDTO crear(SubastaRequestDTO request, String emailVendedor) {
+        if (request.getFechaInicio().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("La fecha de inicio no puede ser anterior a la fecha actual");
+        }
         if (!request.getFechaCierre().isAfter(request.getFechaInicio())) {
             throw new RuntimeException("La fecha de cierre debe ser posterior a la fecha de inicio");
         }
@@ -229,6 +233,7 @@ public class SubastaService {
     }
 
     private SubastaResponseDTO toResponse(Subasta s) {
+        long segundosRestantes = Math.max(0, ChronoUnit.SECONDS.between(LocalDateTime.now(), s.getFechaCierre()));
         return new SubastaResponseDTO(
                 s.getId(),
                 s.getProducto().getId(),
@@ -245,7 +250,8 @@ public class SubastaService {
                 s.getFechaInicio(),
                 s.getFechaCierre(),
                 s.getDescripcion(),
-                s.getEstado().name()
+                s.getEstado().name(),
+                segundosRestantes
         );
     }
 }

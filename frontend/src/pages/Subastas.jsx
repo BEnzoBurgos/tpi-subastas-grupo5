@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
+import CountdownBadge from '../components/CountdownBadge'
+import { formatMoney } from '../utils/format'
 
 const BADGE = {
   BORRADOR: 'badge-borrador', PUBLICADA: 'badge-publicada', ACTIVA: 'badge-activa',
@@ -53,10 +55,13 @@ export default function Subastas() {
                 <span className={`badge ${BADGE[s.estado] || ''}`}>{s.estado}</span>
               </div>
               <p style={{ color: '#888', fontSize: '0.85rem' }}>Vendedor: {s.vendedorNombre} {s.vendedorApellido}</p>
-              <div className="price-display">${s.montoActual?.toFixed(2)}</div>
-              <p style={{ color: '#aaa', fontSize: '0.82rem' }}>
-                Cierre: {new Date(s.fechaCierre).toLocaleString()}
-              </p>
+              <div className="price-display">{formatMoney(s.montoActual)}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                <p style={{ color: '#aaa', fontSize: '0.82rem', margin: 0 }}>
+                  Cierre: {new Date(s.fechaCierre).toLocaleString()}
+                </p>
+                <CountdownBadge initialSeconds={s.tiempoRestanteSegundos} />
+              </div>
             </div>
           </Link>
         ))}

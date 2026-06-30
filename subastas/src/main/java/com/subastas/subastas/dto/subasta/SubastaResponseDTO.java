@@ -25,4 +25,5 @@ public class SubastaResponseDTO {
     private LocalDateTime fechaCierre;
     private String descripcion;
     private String estado;
+    private long tiempoRestanteSegundos;
 }

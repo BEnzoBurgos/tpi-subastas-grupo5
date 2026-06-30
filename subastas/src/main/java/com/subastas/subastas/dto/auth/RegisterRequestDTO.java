@@ -1,5 +1,6 @@
 package com.subastas.subastas.dto.auth;
 
+import com.subastas.subastas.validation.MayorDeEdad;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -26,5 +27,6 @@ public class RegisterRequestDTO {
 
     @NotNull(message = "La fecha de nacimiento es obligatoria")
     @Past(message = "La fecha de nacimiento debe ser en el pasado")
+    @MayorDeEdad
     private LocalDate fechaNacimiento;
 }

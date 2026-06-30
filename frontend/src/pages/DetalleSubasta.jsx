@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import CountdownBadge from '../components/CountdownBadge'
+import { formatMoney } from '../utils/format'
 
 const BADGE = {
   BORRADOR: 'badge-borrador', PUBLICADA: 'badge-publicada', ACTIVA: 'badge-activa',
@@ -98,10 +100,14 @@ export default function DetalleSubasta() {
         <div className="detail-grid">
           <div className="detail-info">
             {subasta.descripcion && <p><strong>Descripción:</strong> {subasta.descripcion}</p>}
-            <p><strong>Precio base:</strong> ${subasta.precioBase?.toFixed(2)}</p>
-            <p><strong>Incremento mínimo:</strong> ${subasta.incrementoMinimo?.toFixed(2)}</p>
+            <p><strong>Precio base:</strong> {formatMoney(subasta.precioBase)}</p>
+            <p><strong>Incremento mínimo:</strong> {formatMoney(subasta.incrementoMinimo)}</p>
             <p><strong>Inicio:</strong> {new Date(subasta.fechaInicio).toLocaleString()}</p>
             <p><strong>Cierre:</strong> {new Date(subasta.fechaCierre).toLocaleString()}</p>
+            <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <strong>Tiempo restante:</strong>
+              <CountdownBadge initialSeconds={subasta.tiempoRestanteSegundos} style={{ fontSize: '0.95rem' }} />
+            </p>
             {subasta.ganadorNombre && (
               <p><strong>Ganador:</strong> {subasta.ganadorNombre} {subasta.ganadorApellido}</p>
             )}
@@ -109,7 +115,7 @@ export default function DetalleSubasta() {
 
           <div>
             <p style={{ color: '#888', fontSize: '0.85rem' }}>Monto actual</p>
-            <div className="price-display">${subasta.montoActual?.toFixed(2)}</div>
+            <div className="price-display">{formatMoney(subasta.montoActual)}</div>
 
             {puedePujar && (
               <form onSubmit={handlePujar} style={{ marginTop: '1rem' }}>
@@ -120,7 +126,7 @@ export default function DetalleSubasta() {
                     step="0.01"
                     value={monto}
                     onChange={e => setMonto(e.target.value)}
-                    placeholder={`Mínimo $${(subasta.montoActual + subasta.incrementoMinimo)?.toFixed(2)}`}
+                    placeholder={`Mínimo ${formatMoney(subasta.montoActual + subasta.incrementoMinimo)}`}
                     required
                   />
                 </div>
@@ -154,7 +160,7 @@ export default function DetalleSubasta() {
                   {new Date(p.fechaHora).toLocaleString()}
                 </span>
               </div>
-              <strong style={{ color: '#27ae60' }}>${p.monto?.toFixed(2)}</strong>
+              <strong style={{ color: '#27ae60' }}>{formatMoney(p.monto)}</strong>
             </div>
           ))
         }
