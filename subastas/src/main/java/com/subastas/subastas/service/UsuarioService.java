@@ -1,7 +1,10 @@
 package com.subastas.subastas.service;
 
 import com.subastas.subastas.dto.usuario.UsuarioResponseDTO;
+import com.subastas.subastas.entity.Rol;
 import com.subastas.subastas.entity.Usuario;
+import com.subastas.subastas.enums.NombreRol;
+import com.subastas.subastas.repository.RolRepository;
 import com.subastas.subastas.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,15 +18,50 @@ import java.util.stream.Collectors;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
 
     public UsuarioResponseDTO obtenerPerfil(String email) {
         return toResponse(buscarPorEmail(email));
+    }
+
+    public List<UsuarioResponseDTO> listarTodos() {
+        return usuarioRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public UsuarioResponseDTO asignarRol(Long id, NombreRol nombreRol) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Rol rol = rolRepository.findByNombre(nombreRol)
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        usuario.getRoles().add(rol);
+        usuarioRepository.save(usuario);
+        return toResponse(usuario);
+    }
+
+    public UsuarioResponseDTO quitarRol(Long id, NombreRol nombreRol) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Rol rol = rolRepository.findByNombre(nombreRol)
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        usuario.getRoles().remove(rol);
+        usuarioRepository.save(usuario);
+        return toResponse(usuario);
     }
 
     public UsuarioResponseDTO bloquear(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         usuario.setBloqueado(true);
+        usuarioRepository.save(usuario);
+        return toResponse(usuario);
+    }
+
+    public UsuarioResponseDTO desbloquear(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setBloqueado(false);
         usuarioRepository.save(usuario);
         return toResponse(usuario);
     }
