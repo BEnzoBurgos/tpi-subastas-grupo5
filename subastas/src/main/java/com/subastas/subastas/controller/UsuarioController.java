@@ -1,11 +1,16 @@
 package com.subastas.subastas.controller;
 
+import com.subastas.subastas.dto.historial.HistorialActividadResponseDTO;
 import com.subastas.subastas.dto.usuario.UsuarioResponseDTO;
+import com.subastas.subastas.entity.Usuario;
 import com.subastas.subastas.enums.NombreRol;
+import com.subastas.subastas.repository.UsuarioRepository;
+import com.subastas.subastas.service.HistorialService;
 import com.subastas.subastas.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -15,11 +20,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsuarioController {
 
-    private final UsuarioService usuarioService;
+    private final UsuarioService    usuarioService;
+    private final HistorialService  historialService;
+    private final UsuarioRepository usuarioRepository;
 
     @GetMapping("/api/usuarios/me")
     public ResponseEntity<UsuarioResponseDTO> obtenerPerfil(Principal principal) {
         return ResponseEntity.ok(usuarioService.obtenerPerfil(principal.getName()));
+    }
+
+    @GetMapping("/api/usuarios/me/historial")
+    public ResponseEntity<HistorialActividadResponseDTO> obtenerHistorial(Principal principal) {
+        Usuario usuario = usuarioRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        return ResponseEntity.ok(historialService.construirHistorial(usuario));
     }
 
     @GetMapping("/api/admin/usuarios")

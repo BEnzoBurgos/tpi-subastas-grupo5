@@ -11,6 +11,7 @@ import CrearSubasta  from './pages/CrearSubasta'
 import Notificaciones  from './pages/Notificaciones'
 import AdminUsuarios   from './pages/AdminUsuarios'
 import AdminCategorias from './pages/AdminCategorias'
+import MiHistorial    from './pages/MiHistorial'
 
 export default function App() {
   return (
@@ -35,6 +36,9 @@ export default function App() {
           } />
           <Route path="/notificaciones" element={
             <PrivateRoute><Notificaciones /></PrivateRoute>
+          } />
+          <Route path="/mi-historial" element={
+            <PrivateRoute><MiHistorial /></PrivateRoute>
           } />
           <Route path="/admin/usuarios" element={
             <PrivateRoute role="ADMIN"><AdminUsuarios /></PrivateRoute>

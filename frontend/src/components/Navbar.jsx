@@ -19,6 +19,7 @@ export default function Navbar() {
         {hasRole('SELLER') && <Link to="/crear-subasta">Crear Subasta</Link>}
         {hasRole('ADMIN') && <Link to="/admin/usuarios">Usuarios</Link>}
         {hasRole('ADMIN') && <Link to="/admin/categorias">Categorias</Link>}
+        <Link to="/mi-historial">Mi Historial</Link>
         <Link to="/notificaciones">Notificaciones</Link>
         <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
           {user?.nombre} ({user?.roles?.join(', ')})
