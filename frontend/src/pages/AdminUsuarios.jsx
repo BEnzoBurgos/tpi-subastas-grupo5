@@ -3,10 +3,16 @@ import { api } from '../api/client'
 
 const ROLES = ['USER', 'SELLER', 'ADMIN']
 
+const ROLE_COLORS = {
+  ADMIN:  { bg: '#ede7f6', color: '#4527a0', border: '#b39ddb' },
+  SELLER: { bg: '#fff3e0', color: '#e65100', border: '#ffcc80' },
+  USER:   { bg: '#e3f2fd', color: '#1565c0', border: '#90caf9' },
+}
+
 export default function AdminUsuarios() {
   const [usuarios, setUsuarios] = useState([])
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(true)
+  const [error,    setError]    = useState('')
+  const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
     api.get('/api/admin/usuarios')
@@ -22,9 +28,7 @@ export default function AdminUsuarios() {
         ? await api.delete(`/api/admin/usuarios/${usuario.id}/roles/${rol}`)
         : await api.put(`/api/admin/usuarios/${usuario.id}/roles/${rol}`)
       setUsuarios(prev => prev.map(u => u.id === updated.id ? updated : u))
-    } catch (e) {
-      setError(e.message)
-    }
+    } catch (e) { setError(e.message) }
   }
 
   const toggleBloqueo = async (usuario) => {
@@ -34,101 +38,93 @@ export default function AdminUsuarios() {
         : `/api/admin/usuarios/${usuario.id}/bloquear`
       const updated = await api.put(endpoint)
       setUsuarios(prev => prev.map(u => u.id === updated.id ? updated : u))
-    } catch (e) {
-      setError(e.message)
-    }
+    } catch (e) { setError(e.message) }
   }
 
-  if (loading) return <div className="container"><p>Cargando usuarios...</p></div>
+  if (loading) return <div className="loading">Cargando usuarios...</div>
 
   return (
     <div className="container">
-      <h2 style={{ marginBottom: '1.5rem' }}>Gestion de Usuarios</h2>
+      <div className="page-header">
+        <h2>Gestion de Usuarios</h2>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>{usuarios.length} usuarios</span>
+      </div>
+
       {error && <div className="error-msg">{error}</div>}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-          <thead>
-            <tr style={{ background: '#f5f5f5', textAlign: 'left' }}>
-              <th style={th}>ID</th>
-              <th style={th}>Nombre</th>
-              <th style={th}>Email</th>
-              <th style={th}>Roles</th>
-              <th style={th}>Estado</th>
-              <th style={th}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.map(u => (
-              <tr key={u.id} style={{ borderBottom: '1px solid #eee', opacity: u.bloqueado ? 0.6 : 1 }}>
-                <td style={td}>{u.id}</td>
-                <td style={td}>{u.nombre} {u.apellido}</td>
-                <td style={td}>{u.email}</td>
-                <td style={td}>
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                    {ROLES.map(rol => (
-                      <button
-                        key={rol}
-                        onClick={() => toggleRol(u, rol)}
-                        style={{
-                          padding: '2px 10px',
-                          borderRadius: '12px',
-                          border: '1.5px solid',
-                          cursor: 'pointer',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          background: u.roles.includes(rol) ? roleColor(rol) : '#fff',
-                          color: u.roles.includes(rol) ? '#fff' : '#888',
-                          borderColor: roleColor(rol),
-                          transition: 'all 0.15s',
-                        }}
-                      >
-                        {rol}
-                      </button>
-                    ))}
-                  </div>
-                </td>
-                <td style={td}>
-                  <span style={{
-                    padding: '2px 10px',
-                    borderRadius: '12px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    background: u.bloqueado ? '#fee2e2' : '#dcfce7',
-                    color: u.bloqueado ? '#dc2626' : '#16a34a',
-                  }}>
-                    {u.bloqueado ? 'Bloqueado' : 'Activo'}
-                  </span>
-                </td>
-                <td style={td}>
-                  <button
-                    onClick={() => toggleBloqueo(u)}
-                    style={{
-                      padding: '4px 12px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.82rem',
-                      background: u.bloqueado ? '#16a34a' : '#dc2626',
-                      color: '#fff',
-                    }}
-                  >
-                    {u.bloqueado ? 'Desbloquear' : 'Bloquear'}
-                  </button>
-                </td>
+
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {usuarios.map(u => (
+                <tr key={u.id} style={{ opacity: u.bloqueado ? 0.6 : 1 }}>
+                  <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>#{u.id}</td>
+                  <td style={{ fontWeight: 600 }}>{u.nombre} {u.apellido}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                      {ROLES.map(rol => {
+                        const c = ROLE_COLORS[rol]
+                        const activo = u.roles.includes(rol)
+                        return (
+                          <button
+                            key={rol}
+                            onClick={() => toggleRol(u, rol)}
+                            style={{
+                              padding: '2px 10px',
+                              borderRadius: '12px',
+                              border: `1.5px solid ${activo ? c.border : 'var(--border)'}`,
+                              cursor: 'pointer',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              background: activo ? c.bg : '#fff',
+                              color: activo ? c.color : 'var(--text-muted)',
+                              transition: 'all 0.15s',
+                              letterSpacing: '0.03em',
+                            }}
+                          >
+                            {rol}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </td>
+                  <td>
+                    <span style={{
+                      padding: '3px 10px',
+                      borderRadius: '12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      background: u.bloqueado ? 'var(--red-light)' : 'var(--green-light)',
+                      color: u.bloqueado ? 'var(--red)' : 'var(--green)',
+                    }}>
+                      {u.bloqueado ? 'Bloqueado' : 'Activo'}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => toggleBloqueo(u)}
+                      className={`btn btn-sm ${u.bloqueado ? 'btn-success' : 'btn-danger'}`}
+                    >
+                      {u.bloqueado ? 'Desbloquear' : 'Bloquear'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
-}
-
-const th = { padding: '12px 16px', fontWeight: 600, fontSize: '0.85rem', color: '#555' }
-const td = { padding: '12px 16px', fontSize: '0.9rem' }
-
-function roleColor(rol) {
-  if (rol === 'ADMIN')  return '#7c3aed'
-  if (rol === 'SELLER') return '#ea580c'
-  return '#2563eb'
 }

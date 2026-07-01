@@ -144,22 +144,14 @@ function TablaDisputas({ rows }) {
 
 function Table({ headers, rows }) {
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+    <div className="table-wrapper" style={{ border: 'none' }}>
+      <table>
         <thead>
-          <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
-            {headers.map(h => (
-              <th key={h} style={{ padding: '10px 14px', fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>{h}</th>
-            ))}
-          </tr>
+          <tr>{headers.map(h => <th key={h}>{h}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((cells, i) => (
-            <tr key={i} style={{ borderTop: '1px solid #f0f0f0' }}>
-              {cells.map((cell, j) => (
-                <td key={j} style={{ padding: '10px 14px', color: '#333' }}>{cell}</td>
-              ))}
-            </tr>
+            <tr key={i}>{cells.map((cell, j) => <td key={j}>{cell}</td>)}</tr>
           ))}
         </tbody>
       </table>

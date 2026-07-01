@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const { login } = useAuth()
-  const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [error, setError] = useState('')
+  const navigate  = useNavigate()
+  const [form,    setForm]    = useState({ email: '', password: '' })
+  const [error,   setError]   = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
@@ -26,9 +26,13 @@ export default function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>🏷️ TPI Subastas</h2>
-        <h3 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#555', fontWeight: 400 }}>Iniciar sesión</h3>
+        <div className="auth-logo">
+          <h1>TPI Subastas</h1>
+          <p>Ingresa a tu cuenta para continuar</p>
+        </div>
+
         {error && <div className="error-msg">{error}</div>}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
@@ -38,25 +42,32 @@ export default function Login() {
               onChange={e => setForm({ ...form, email: e.target.value })}
               placeholder="tu@email.com"
               required
+              autoFocus
             />
           </div>
           <div className="form-group">
-            <label>Contraseña</label>
+            <label>Contrasena</label>
             <input
               type="password"
               value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })}
-              placeholder="••••••"
+              placeholder="••••••••"
               required
             />
           </div>
-          <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? 'Ingresando...' : 'Ingresar'}
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={loading}
+            style={{ width: '100%', marginTop: '0.5rem', padding: '0.75rem' }}
+          >
+            {loading ? 'Ingresando...' : 'Iniciar sesion'}
           </button>
         </form>
-        <p className="text-center mt-2">
-          ¿No tenés cuenta? <Link to="/register" className="link">Registrate</Link>
-        </p>
+
+        <div className="auth-divider">
+          No tenes cuenta? <Link to="/register">Registrate</Link>
+        </div>
       </div>
     </div>
   )

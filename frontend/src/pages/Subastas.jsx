@@ -5,18 +5,23 @@ import CountdownBadge from '../components/CountdownBadge'
 import { formatMoney } from '../utils/format'
 
 const BADGE = {
-  BORRADOR: 'badge-borrador', PUBLICADA: 'badge-publicada', ACTIVA: 'badge-activa',
-  FINALIZADA: 'badge-finalizada', ADJUDICADA: 'badge-adjudicada',
-  CANCELADA: 'badge-cancelada', EN_DISPUTA: 'badge-en_disputa'
+  BORRADOR:   'badge-borrador',  PUBLICADA:  'badge-publicada',
+  ACTIVA:     'badge-activa',    FINALIZADA: 'badge-finalizada',
+  ADJUDICADA: 'badge-adjudicada',CANCELADA:  'badge-cancelada',
+  EN_DISPUTA: 'badge-en_disputa',
+}
+
+function inicial(nombre) {
+  return (nombre || '?').charAt(0).toUpperCase()
 }
 
 export default function Subastas() {
   const [subastas, setSubastas] = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [filtro, setFiltro]     = useState('')
+  const [loading,  setLoading]  = useState(true)
+  const [filtro,   setFiltro]   = useState('')
 
   useEffect(() => {
-    api.get('/api/subastas')
+    api.get('/api/publico/subastas')
       .then(setSubastas)
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -34,32 +39,36 @@ export default function Subastas() {
       <div className="page-header">
         <h2>Subastas</h2>
         <input
-          className="form-group input"
-          style={{ padding: '0.5rem 0.8rem', border: '1px solid #ddd', borderRadius: 6, width: 220 }}
+          style={{ padding: '0.55rem 0.9rem', border: '1.5px solid var(--border)', borderRadius: '8px', width: 240, fontSize: '0.9rem', outline: 'none', fontFamily: 'inherit' }}
           placeholder="Buscar por producto o estado..."
           value={filtro}
           onChange={e => setFiltro(e.target.value)}
         />
       </div>
 
-      {filtradas.length === 0 && <p style={{ color: '#aaa' }}>No hay subastas para mostrar.</p>}
+      {filtradas.length === 0 && (
+        <p className="text-muted" style={{ padding: '2rem 0' }}>No hay subastas activas en este momento.</p>
+      )}
 
       <div className="grid">
         {filtradas.map(s => (
-          <Link to={`/subastas/${s.id}`} key={s.id} style={{ textDecoration: 'none' }}>
-            <div className="card" style={{ cursor: 'pointer', transition: 'box-shadow 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.13)'}
-              onMouseLeave={e => e.currentTarget.style.boxShadow = ''}>
-              <div className="card-header">
-                <h3>{s.productoNombre}</h3>
-                <span className={`badge ${BADGE[s.estado] || ''}`}>{s.estado}</span>
+          <Link to={`/subastas/${s.id}`} key={s.id} className="auction-card">
+            <div className="auction-card-img">{inicial(s.productoNombre)}</div>
+            <div className="auction-card-body">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.3rem' }}>
+                <div className="auction-card-title">{s.productoNombre}</div>
+                <span className={`badge ${BADGE[s.estado] || ''}`} style={{ marginLeft: '0.5rem', flexShrink: 0 }}>
+                  {s.estado}
+                </span>
               </div>
-              <p style={{ color: '#888', fontSize: '0.85rem' }}>Vendedor: {s.vendedorNombre} {s.vendedorApellido}</p>
-              <div className="price-display">{formatMoney(s.montoActual)}</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                <p style={{ color: '#aaa', fontSize: '0.82rem', margin: 0 }}>
-                  Cierre: {new Date(s.fechaCierre).toLocaleString()}
-                </p>
+              <div className="auction-card-vendor">
+                {s.vendedorNombre} {s.vendedorApellido}
+              </div>
+              <div className="auction-card-price">{formatMoney(s.montoActual)}</div>
+              <div className="auction-card-footer">
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  Cierre: {new Date(s.fechaCierre).toLocaleDateString()}
+                </span>
                 <CountdownBadge initialSeconds={s.tiempoRestanteSegundos} />
               </div>
             </div>

@@ -4,10 +4,8 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Register() {
   const { register } = useAuth()
-  const navigate = useNavigate()
-  const [form, setForm] = useState({
-    nombre: '', apellido: '', email: '', password: '', fechaNacimiento: ''
-  })
+  const navigate     = useNavigate()
+  const [form, setForm]       = useState({ nombre: '', apellido: '', email: '', password: '', fechaNacimiento: '' })
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -30,18 +28,22 @@ export default function Register() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>🏷️ TPI Subastas</h2>
-        <h3 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#555', fontWeight: 400 }}>Crear cuenta</h3>
+        <div className="auth-logo">
+          <h1>TPI Subastas</h1>
+          <p>Crea tu cuenta gratuitamente</p>
+        </div>
+
         {error && <div className="error-msg">{error}</div>}
+
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div className="form-group">
               <label>Nombre</label>
               <input value={form.nombre} onChange={set('nombre')} placeholder="Juan" required />
             </div>
             <div className="form-group">
               <label>Apellido</label>
-              <input value={form.apellido} onChange={set('apellido')} placeholder="Pérez" required />
+              <input value={form.apellido} onChange={set('apellido')} placeholder="Perez" required />
             </div>
           </div>
           <div className="form-group">
@@ -49,20 +51,26 @@ export default function Register() {
             <input type="email" value={form.email} onChange={set('email')} placeholder="tu@email.com" required />
           </div>
           <div className="form-group">
-            <label>Contraseña</label>
-            <input type="password" value={form.password} onChange={set('password')} placeholder="Mínimo 6 caracteres" required />
+            <label>Contrasena</label>
+            <input type="password" value={form.password} onChange={set('password')} placeholder="Minimo 6 caracteres" required />
           </div>
           <div className="form-group">
             <label>Fecha de nacimiento</label>
             <input type="date" value={form.fechaNacimiento} onChange={set('fechaNacimiento')} required />
           </div>
-          <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? 'Registrando...' : 'Registrarse'}
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={loading}
+            style={{ width: '100%', marginTop: '0.5rem', padding: '0.75rem' }}
+          >
+            {loading ? 'Registrando...' : 'Crear cuenta'}
           </button>
         </form>
-        <p className="text-center mt-2">
-          ¿Ya tenés cuenta? <Link to="/login" className="link">Iniciá sesión</Link>
-        </p>
+
+        <div className="auth-divider">
+          Ya tenes cuenta? <Link to="/login">Iniciar sesion</Link>
+        </div>
       </div>
     </div>
   )

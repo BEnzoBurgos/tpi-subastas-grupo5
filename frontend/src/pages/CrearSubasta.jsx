@@ -12,9 +12,7 @@ export default function CrearSubasta() {
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    api.get('/api/productos').then(setProductos).catch(console.error)
-  }, [])
+  useEffect(() => { api.get('/api/productos').then(setProductos).catch(console.error) }, [])
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
@@ -42,38 +40,41 @@ export default function CrearSubasta() {
 
   return (
     <div className="container">
-      <div style={{ maxWidth: 560, margin: '0 auto' }}>
+      <div style={{ maxWidth: 620, margin: '0 auto' }}>
         <div className="page-header">
-          <h2>Crear Subasta</h2>
-          <button className="btn btn-sm" style={{ background: '#eee' }} onClick={() => navigate('/subastas')}>
+          <h2>Nueva Subasta</h2>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/subastas')}>
             ← Volver
           </button>
         </div>
+
         <div className="card">
           {error && <div className="error-msg">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Producto</label>
               <select value={form.productoId} onChange={set('productoId')} required>
-                <option value="">Seleccioná un producto</option>
+                <option value="">Selecciona un producto</option>
                 {productos.map(p => (
                   <option key={p.id} value={p.id}>{p.nombre} — {p.categoriaNombre}</option>
                 ))}
               </select>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div className="form-group">
                 <label>Precio base ($)</label>
                 <input type="number" step="0.01" min="0.01" value={form.precioBase}
                   onChange={set('precioBase')} placeholder="100.00" required />
               </div>
               <div className="form-group">
-                <label>Incremento mínimo ($)</label>
+                <label>Incremento minimo ($)</label>
                 <input type="number" step="0.01" min="0.01" value={form.incrementoMinimo}
                   onChange={set('incrementoMinimo')} placeholder="10.00" required />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div className="form-group">
                 <label>Fecha de inicio</label>
                 <input type="datetime-local" value={form.fechaInicio} onChange={set('fechaInicio')} required />
@@ -83,12 +84,14 @@ export default function CrearSubasta() {
                 <input type="datetime-local" value={form.fechaCierre} onChange={set('fechaCierre')} required />
               </div>
             </div>
+
             <div className="form-group">
-              <label>Descripción (opcional)</label>
+              <label>Descripcion (opcional)</label>
               <textarea value={form.descripcion} onChange={set('descripcion')} rows={3}
                 placeholder="Detalle adicional sobre la subasta..." />
             </div>
-            <button className="btn btn-primary" type="submit" disabled={loading}>
+
+            <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', padding: '0.75rem' }}>
               {loading ? 'Creando...' : 'Crear Subasta'}
             </button>
           </form>

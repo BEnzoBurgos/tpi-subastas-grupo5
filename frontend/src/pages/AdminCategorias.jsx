@@ -3,10 +3,10 @@ import { api } from '../api/client'
 
 export default function AdminCategorias() {
   const [categorias, setCategorias] = useState([])
-  const [nombre, setNombre]         = useState('')
-  const [error, setError]           = useState('')
-  const [loading, setLoading]       = useState(true)
-  const [creando, setCreando]       = useState(false)
+  const [nombre,  setNombre]  = useState('')
+  const [error,   setError]   = useState('')
+  const [loading, setLoading] = useState(true)
+  const [creando, setCreando] = useState(false)
 
   useEffect(() => {
     api.get('/api/categorias')
@@ -32,7 +32,7 @@ export default function AdminCategorias() {
   }
 
   const eliminar = async (id) => {
-    if (!confirm('¿Eliminar esta categoria?')) return
+    if (!confirm('Eliminar esta categoria?')) return
     setError('')
     try {
       await api.delete(`/api/categorias/${id}`)
@@ -42,64 +42,69 @@ export default function AdminCategorias() {
     }
   }
 
-  if (loading) return <div className="container"><p>Cargando categorias...</p></div>
+  if (loading) return <div className="loading">Cargando categorias...</div>
 
   return (
-    <div className="container" style={{ maxWidth: '600px' }}>
-      <h2 style={{ marginBottom: '1.5rem' }}>Gestion de Categorias</h2>
+    <div className="container">
+      <div className="page-header">
+        <h2>Gestion de Categorias</h2>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>{categorias.length} categorias</span>
+      </div>
 
       {error && <div className="error-msg">{error}</div>}
 
-      <form onSubmit={crear} style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem' }}>
-        <input
-          type="text"
-          value={nombre}
-          onChange={e => setNombre(e.target.value)}
-          placeholder="Nombre de la nueva categoria"
-          style={{ flex: 1, padding: '0.6rem 1rem', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.95rem' }}
-        />
-        <button className="btn btn-primary" type="submit" disabled={creando || !nombre.trim()}>
-          {creando ? 'Creando...' : 'Agregar'}
-        </button>
-      </form>
-
-      <div style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-        {categorias.length === 0 && (
-          <p style={{ padding: '1.5rem', color: '#888', textAlign: 'center' }}>No hay categorias cargadas.</p>
-        )}
-        {categorias.map((cat, i) => (
-          <div
-            key={cat.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.85rem 1.25rem',
-              borderBottom: i < categorias.length - 1 ? '1px solid #f0f0f0' : 'none',
-            }}
-          >
-            <span style={{ fontSize: '0.95rem' }}>{cat.nombre}</span>
-            <button
-              onClick={() => eliminar(cat.id)}
-              style={{
-                background: 'none',
-                border: '1px solid #fca5a5',
-                color: '#dc2626',
-                borderRadius: '6px',
-                padding: '3px 12px',
-                cursor: 'pointer',
-                fontSize: '0.82rem',
-              }}
-            >
-              Eliminar
-            </button>
-          </div>
-        ))}
+      <div className="card" style={{ marginBottom: '1.5rem' }}>
+        <h3 className="section-title">Agregar nueva categoria</h3>
+        <form onSubmit={crear} style={{ display: 'flex', gap: '0.75rem' }}>
+          <input
+            type="text"
+            value={nombre}
+            onChange={e => setNombre(e.target.value)}
+            placeholder="Nombre de la nueva categoria"
+            style={{ flex: 1 }}
+          />
+          <button className="btn btn-primary" type="submit" disabled={creando || !nombre.trim()}>
+            {creando ? 'Agregando...' : 'Agregar'}
+          </button>
+        </form>
       </div>
 
-      <p style={{ marginTop: '1rem', fontSize: '0.82rem', color: '#aaa' }}>
-        {categorias.length} categoria{categorias.length !== 1 ? 's' : ''} en total
-      </p>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
+          {categorias.length === 0 ? (
+            <p style={{ padding: '2rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+              No hay categorias cargadas.
+            </p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th style={{ textAlign: 'right' }}>Accion</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categorias.map(cat => (
+                  <tr key={cat.id}>
+                    <td style={{ color: 'var(--text-muted)', fontWeight: 600, width: 60 }}>#{cat.id}</td>
+                    <td style={{ fontWeight: 500 }}>{cat.nombre}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        onClick={() => eliminar(cat.id)}
+                        className="btn btn-danger btn-sm"
+                        style={{ background: 'transparent', color: 'var(--red)', border: '1px solid var(--red)' }}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

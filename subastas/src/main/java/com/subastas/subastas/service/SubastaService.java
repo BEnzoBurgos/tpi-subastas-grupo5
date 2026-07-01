@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -143,8 +144,26 @@ public class SubastaService {
                 .collect(Collectors.toList());
     }
 
+    public List<SubastaResponseDTO> listarPublicas() {
+        return Stream.concat(
+                subastaRepository.findByEstado(EstadoSubasta.ACTIVA).stream(),
+                subastaRepository.findByEstado(EstadoSubasta.PUBLICADA).stream()
+        ).map(this::toResponse).collect(Collectors.toList());
+    }
+
     public SubastaResponseDTO obtenerPorId(Long id) {
         return toResponse(buscarSubasta(id));
+    }
+
+    public SubastaResponseDTO obtenerPublicoPorId(Long id) {
+        Subasta subasta = buscarSubasta(id);
+        if (subasta.getEstado() != EstadoSubasta.ACTIVA &&
+            subasta.getEstado() != EstadoSubasta.PUBLICADA &&
+            subasta.getEstado() != EstadoSubasta.ADJUDICADA &&
+            subasta.getEstado() != EstadoSubasta.FINALIZADA) {
+            throw new RuntimeException("Subasta no disponible");
+        }
+        return toResponse(subasta);
     }
 
     // ── Métodos para el Scheduler ─────────────────────────────────────────────

@@ -22,12 +22,8 @@ export default function App() {
           <Route path="/login"    element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          <Route path="/subastas" element={
-            <PrivateRoute><Subastas /></PrivateRoute>
-          } />
-          <Route path="/subastas/:id" element={
-            <PrivateRoute><DetalleSubasta /></PrivateRoute>
-          } />
+          <Route path="/subastas"     element={<Subastas />} />
+          <Route path="/subastas/:id" element={<DetalleSubasta />} />
           <Route path="/crear-producto" element={
             <PrivateRoute role="SELLER"><CrearProducto /></PrivateRoute>
           } />
