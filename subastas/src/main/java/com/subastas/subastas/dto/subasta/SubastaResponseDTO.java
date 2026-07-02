@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -26,4 +27,6 @@ public class SubastaResponseDTO {
     private String descripcion;
     private String estado;
     private long tiempoRestanteSegundos;
+    private List<String> productoImagenesUrl;
+    private Long disputaId;
 }

@@ -11,7 +11,9 @@ import CrearSubasta  from './pages/CrearSubasta'
 import Notificaciones  from './pages/Notificaciones'
 import AdminUsuarios   from './pages/AdminUsuarios'
 import AdminCategorias from './pages/AdminCategorias'
+import AdminDisputas   from './pages/AdminDisputas'
 import MiHistorial    from './pages/MiHistorial'
+import MisSubastas    from './pages/MisSubastas'
 
 export default function App() {
   return (
@@ -24,6 +26,9 @@ export default function App() {
 
           <Route path="/subastas"     element={<Subastas />} />
           <Route path="/subastas/:id" element={<DetalleSubasta />} />
+          <Route path="/mis-subastas" element={
+            <PrivateRoute role="SELLER"><MisSubastas /></PrivateRoute>
+          } />
           <Route path="/crear-producto" element={
             <PrivateRoute role="SELLER"><CrearProducto /></PrivateRoute>
           } />
@@ -41,6 +46,9 @@ export default function App() {
           } />
           <Route path="/admin/categorias" element={
             <PrivateRoute role="ADMIN"><AdminCategorias /></PrivateRoute>
+          } />
+          <Route path="/admin/disputas" element={
+            <PrivateRoute role="ADMIN"><AdminDisputas /></PrivateRoute>
           } />
 
           <Route path="*" element={<Navigate to="/subastas" replace />} />

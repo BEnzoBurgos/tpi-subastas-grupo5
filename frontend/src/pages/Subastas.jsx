@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import CountdownBadge from '../components/CountdownBadge'
 import { formatMoney } from '../utils/format'
 
@@ -16,12 +17,14 @@ function inicial(nombre) {
 }
 
 export default function Subastas() {
+  const { hasRole } = useAuth()
   const [subastas, setSubastas] = useState([])
   const [loading,  setLoading]  = useState(true)
   const [filtro,   setFiltro]   = useState('')
 
   useEffect(() => {
-    api.get('/api/publico/subastas')
+    const endpoint = hasRole('ADMIN') ? '/api/subastas' : '/api/publico/subastas'
+    api.get(endpoint)
       .then(setSubastas)
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -53,7 +56,10 @@ export default function Subastas() {
       <div className="grid">
         {filtradas.map(s => (
           <Link to={`/subastas/${s.id}`} key={s.id} className="auction-card">
-            <div className="auction-card-img">{inicial(s.productoNombre)}</div>
+            {s.productoImagenesUrl?.[0]
+              ? <img src={s.productoImagenesUrl[0]} alt={s.productoNombre} className="auction-card-img" style={{ objectFit: 'cover' }} />
+              : <div className="auction-card-img">{inicial(s.productoNombre)}</div>
+            }
             <div className="auction-card-body">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.3rem' }}>
                 <div className="auction-card-title">{s.productoNombre}</div>

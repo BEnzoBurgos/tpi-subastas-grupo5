@@ -21,13 +21,23 @@ public class SubastaController {
     private final SubastaService subastaService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SubastaResponseDTO>> listar() {
         return ResponseEntity.ok(subastaService.listar());
     }
 
+    @GetMapping("/mis-subastas")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<List<SubastaResponseDTO>> misSubastas(Principal principal) {
+        return ResponseEntity.ok(subastaService.listarMisSubastas(principal.getName()));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<SubastaResponseDTO> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(subastaService.obtenerPorId(id));
+    public ResponseEntity<SubastaResponseDTO> obtenerPorId(
+            @PathVariable Long id,
+            Principal principal) {
+        String email = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(subastaService.obtenerPorId(id, email));
     }
 
     @PostMapping

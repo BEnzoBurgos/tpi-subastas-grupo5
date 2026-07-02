@@ -3,6 +3,7 @@ package com.subastas.subastas.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,6 +35,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleMessageNotReadable(HttpMessageNotReadableException ex) {
         return ResponseEntity.badRequest()
             .body(Map.of("message", "Formato de datos inválido. Verificá que las fechas y campos enviados sean correctos"));
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<Map<String, String>> handleLockedException(LockedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(Map.of("message",
+                "Tu cuenta está bloqueada. Para más información contactá a subastasonline@gmail.com"));
     }
 
     @ExceptionHandler(RuntimeException.class)

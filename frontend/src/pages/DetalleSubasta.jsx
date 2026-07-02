@@ -17,14 +17,17 @@ export default function DetalleSubasta() {
   const { user, hasRole } = useAuth()
   const navigate = useNavigate()
 
-  const [subasta, setSubasta] = useState(null)
-  const [pujas,   setPujas]   = useState([])
-  const [monto,   setMonto]   = useState('')
-  const [msg,     setMsg]     = useState({ type: '', text: '' })
-  const [loading, setLoading] = useState(true)
+  const [subasta,    setSubasta]    = useState(null)
+  const [pujas,      setPujas]      = useState([])
+  const [monto,      setMonto]      = useState('')
+  const [msg,        setMsg]        = useState({ type: '', text: '' })
+  const [modalError, setModalError] = useState('')
+  const [loading,    setLoading]    = useState(true)
+  const [imgActiva,  setImgActiva]  = useState(0)
 
   const cargar = async () => {
-    const s = await api.get(`/api/publico/subastas/${id}`)
+    const endpoint = user ? `/api/subastas/${id}` : `/api/publico/subastas/${id}`
+    const s = await api.get(endpoint)
     setSubasta(s)
     if (user) {
       const p = await api.get(`/api/subastas/${id}/pujas`)
@@ -51,7 +54,7 @@ export default function DetalleSubasta() {
       setMonto('')
       showMsg('success', 'Puja registrada con exito.')
       await cargar()
-    } catch (err) { showMsg('error', err.message) }
+    } catch (err) { setModalError(err.message) }
   }
 
   const handlePublicar = async () => {
@@ -90,6 +93,36 @@ export default function DetalleSubasta() {
 
       {/* Cabecera */}
       <div className="card">
+        {subasta.productoImagenesUrl?.length > 0 && (
+          <div style={{ position: 'relative', borderRadius: '8px 8px 0 0', overflow: 'hidden', background: '#000' }}>
+            <img
+              src={subasta.productoImagenesUrl[imgActiva]}
+              alt={subasta.productoNombre}
+              style={{ width: '100%', maxHeight: 340, objectFit: 'contain', display: 'block' }}
+            />
+            {subasta.productoImagenesUrl.length > 1 && (
+              <>
+                <button
+                  onClick={() => setImgActiva(i => (i - 1 + subasta.productoImagenesUrl.length) % subasta.productoImagenesUrl.length)}
+                  style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.45)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, fontSize: '1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >&#8249;</button>
+                <button
+                  onClick={() => setImgActiva(i => (i + 1) % subasta.productoImagenesUrl.length)}
+                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.45)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, fontSize: '1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >&#8250;</button>
+                <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
+                  {subasta.productoImagenesUrl.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setImgActiva(i)}
+                      style={{ width: 8, height: 8, borderRadius: '50%', border: 'none', padding: 0, cursor: 'pointer', background: i === imgActiva ? '#fff' : 'rgba(255,255,255,0.45)' }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
         <div className="card-header" style={{ alignItems: 'center' }}>
           <div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.2rem' }}>
@@ -179,6 +212,31 @@ export default function DetalleSubasta() {
           </div>
         </div>
       </div>
+
+      {/* Modal de error de puja */}
+      {modalError && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '10px', padding: '2rem',
+            maxWidth: 400, width: '90%', boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>⚠️</div>
+            <h3 style={{ margin: '0 0 0.75rem', fontSize: '1.1rem', color: 'var(--red)' }}>
+              No se pudo registrar la puja
+            </h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+              {modalError}
+            </p>
+            <button className="btn btn-primary" onClick={() => setModalError('')} style={{ width: '100%' }}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Historial de pujas — solo visible para usuarios logueados */}
       {user && (

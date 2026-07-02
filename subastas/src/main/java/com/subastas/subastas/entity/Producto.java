@@ -3,6 +3,9 @@ package com.subastas.subastas.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "Producto")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -25,4 +28,9 @@ public class Producto {
     @ManyToOne(optional = false)
     @JoinColumn(name = "vendedor_id", nullable = false)
     private Usuario vendedor;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC")
+    @Builder.Default
+    private List<ImagenProducto> imagenes = new ArrayList<>();
 }

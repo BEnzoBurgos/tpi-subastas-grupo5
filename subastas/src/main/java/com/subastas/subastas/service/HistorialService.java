@@ -6,6 +6,7 @@ import com.subastas.subastas.dto.producto.ProductoResponseDTO;
 import com.subastas.subastas.dto.puja.PujaResponseDTO;
 import com.subastas.subastas.dto.subasta.SubastaResponseDTO;
 import com.subastas.subastas.entity.Disputa;
+import com.subastas.subastas.entity.ImagenProducto;
 import com.subastas.subastas.entity.Producto;
 import com.subastas.subastas.entity.Puja;
 import com.subastas.subastas.entity.Subasta;
@@ -18,7 +19,6 @@ import com.subastas.subastas.repository.SubastaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -94,8 +94,17 @@ public class HistorialService {
         );
     }
 
+    private static final List<EstadoSubasta> ESTADOS_LIBRES =
+            List.of(EstadoSubasta.BORRADOR, EstadoSubasta.CANCELADA);
+
     private SubastaResponseDTO subastaToResponse(Subasta s) {
         long segundos = Math.max(0, ChronoUnit.SECONDS.between(LocalDateTime.now(), s.getFechaCierre()));
+        Long disputaId = disputaRepository.findBySubastaId(s.getId())
+                .map(d -> d.getId())
+                .orElse(null);
+        List<String> imagenesUrl = s.getProducto().getImagenes().stream()
+                .map(ImagenProducto::getUrl)
+                .collect(Collectors.toList());
         return new SubastaResponseDTO(
                 s.getId(),
                 s.getProducto().getId(),
@@ -113,11 +122,17 @@ public class HistorialService {
                 s.getFechaCierre(),
                 s.getDescripcion(),
                 s.getEstado().name(),
-                segundos
+                segundos,
+                imagenesUrl,
+                disputaId
         );
     }
 
     private ProductoResponseDTO productoToResponse(Producto p) {
+        boolean bloqueado = subastaRepository.existsByProductoIdAndEstadoNotIn(p.getId(), ESTADOS_LIBRES);
+        List<String> imagenesUrl = p.getImagenes().stream()
+                .map(ImagenProducto::getUrl)
+                .collect(Collectors.toList());
         return new ProductoResponseDTO(
                 p.getId(),
                 p.getNombre(),
@@ -126,7 +141,9 @@ public class HistorialService {
                 p.getCategoria().getNombre(),
                 p.getVendedor().getId(),
                 p.getVendedor().getNombre(),
-                p.getVendedor().getApellido()
+                p.getVendedor().getApellido(),
+                bloqueado,
+                imagenesUrl
         );
     }
 

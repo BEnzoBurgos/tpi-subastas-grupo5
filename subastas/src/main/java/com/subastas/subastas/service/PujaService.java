@@ -56,6 +56,10 @@ public class PujaService {
         BigDecimal monto = request.getMonto();
         Optional<Puja> topPuja = pujaRepository.findTopBySubastaIdOrderByMontoDesc(subastaId);
 
+        if (topPuja.isPresent() && topPuja.get().getUsuario().getEmail().equals(emailUsuario)) {
+            throw new RuntimeException("Ya sos el mayor postor de esta subasta con " + topPuja.get().getMonto());
+        }
+
         if (topPuja.isEmpty()) {
             if (monto.compareTo(subasta.getPrecioBase()) < 0) {
                 throw new RuntimeException(

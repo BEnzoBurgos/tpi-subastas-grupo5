@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -92,20 +93,65 @@ public class DisputaService {
             throw new RuntimeException("Esta disputa ya fue resuelta");
         }
 
+        EstadoSubasta estadoFinal = EstadoSubasta.valueOf(request.getEstadoFinal());
+
+        LocalDateTime ahora = LocalDateTime.now();
         disputa.setResolucion(request.getResolucion());
-        disputa.setFechaResolucion(LocalDateTime.now());
+        disputa.setFechaResolucion(ahora);
         disputaRepository.save(disputa);
 
+        Subasta subasta = disputa.getSubasta();
+        historialEstadoRepository.save(HistorialEstado.builder()
+                .subasta(subasta)
+                .usuario(null)
+                .estadoAnterior(EstadoSubasta.EN_DISPUTA)
+                .estadoNuevo(estadoFinal)
+                .fecha(ahora)
+                .motivo("Disputa resuelta: " + request.getResolucion())
+                .build());
+
+        subasta.setEstado(estadoFinal);
+        subastaRepository.save(subasta);
+
         notificacionService.crearNotificacion(disputa.getUsuario(), "DISPUTA_RESUELTA",
-                "Tu disputa sobre la subasta de " + disputa.getSubasta().getProducto().getNombre()
-                + " fue resuelta: " + request.getResolucion());
+                "Tu disputa sobre la subasta de " + subasta.getProducto().getNombre()
+                + " fue resuelta. Estado final: " + estadoFinal.name()
+                + ". " + request.getResolucion());
 
         return toResponse(disputa);
     }
 
-    public DisputaResponseDTO obtenerPorId(Long id) {
-        return toResponse(disputaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Disputa no encontrada")));
+    public List<DisputaResponseDTO> listarTodas() {
+        return disputaRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<DisputaResponseDTO> listarPendientes() {
+        return disputaRepository.findByFechaResolucionIsNull().stream()
+                .map(this::toResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public DisputaResponseDTO obtenerPorId(Long id, String emailUsuario) {
+        Disputa disputa = disputaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Disputa no encontrada"));
+
+        Usuario usuario = buscarUsuario(emailUsuario);
+        boolean esAdmin    = tieneRol(usuario, "ADMIN");
+        boolean esAbridor  = disputa.getUsuario().getEmail().equals(emailUsuario);
+        boolean esVendedor = disputa.getSubasta().getVendedor().getEmail().equals(emailUsuario);
+
+        if (!esAdmin && !esAbridor && !esVendedor) {
+            throw new RuntimeException("No tenés permiso para ver esta disputa");
+        }
+
+        return toResponse(disputa);
+    }
+
+    private boolean tieneRol(Usuario usuario, String rol) {
+        return usuario.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_" + rol));
     }
 
     private Usuario buscarUsuario(String email) {

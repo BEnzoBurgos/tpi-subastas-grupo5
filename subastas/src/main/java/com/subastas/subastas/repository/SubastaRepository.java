@@ -16,6 +16,8 @@ public interface SubastaRepository extends JpaRepository<Subasta, Long> {
     List<Subasta> findByEstado(EstadoSubasta estado);
     List<Subasta> findByVendedorId(Long vendedorId);
     List<Subasta> findByGanadorId(Long ganadorId);
+    boolean existsByProductoId(Long productoId);
+    boolean existsByProductoIdAndEstadoNotIn(Long productoId, java.util.Collection<com.subastas.subastas.enums.EstadoSubasta> estados);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM Subasta s WHERE s.id = :id")

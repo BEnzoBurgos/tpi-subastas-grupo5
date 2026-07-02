@@ -12,7 +12,7 @@ export default function CrearSubasta() {
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => { api.get('/api/productos').then(setProductos).catch(console.error) }, [])
+  useEffect(() => { api.get('/api/productos/mis-productos').then(setProductos).catch(console.error) }, [])
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
@@ -29,8 +29,8 @@ export default function CrearSubasta() {
         fechaCierre:      form.fechaCierre,
         descripcion:      form.descripcion,
       }
-      const subasta = await api.post('/api/subastas', payload)
-      navigate(`/subastas/${subasta.id}`)
+      await api.post('/api/subastas', payload)
+      navigate('/mis-subastas')
     } catch (err) {
       setError(err.message)
     } finally {

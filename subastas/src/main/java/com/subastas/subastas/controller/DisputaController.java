@@ -11,12 +11,25 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 public class DisputaController {
 
     private final DisputaService disputaService;
+
+    @GetMapping("/api/admin/disputas")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<DisputaResponseDTO>> listarTodas() {
+        return ResponseEntity.ok(disputaService.listarTodas());
+    }
+
+    @GetMapping("/api/admin/disputas/pendientes")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<DisputaResponseDTO>> listarPendientes() {
+        return ResponseEntity.ok(disputaService.listarPendientes());
+    }
 
     @PostMapping("/api/subastas/{id}/disputas")
     @PreAuthorize("hasRole('SELLER') or hasRole('USER')")
@@ -36,8 +49,9 @@ public class DisputaController {
     }
 
     @GetMapping("/api/disputas/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DisputaResponseDTO> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(disputaService.obtenerPorId(id));
+    public ResponseEntity<DisputaResponseDTO> obtenerPorId(
+            @PathVariable Long id,
+            Principal principal) {
+        return ResponseEntity.ok(disputaService.obtenerPorId(id, principal.getName()));
     }
 }

@@ -17,12 +17,14 @@ export default function Navbar() {
 
         {user && (
           <>
-            {hasRole('SELLER') && <Link to="/crear-producto">Nuevo Producto</Link>}
+            {hasRole('SELLER') && <Link to="/mis-subastas">Mis Subastas</Link>}
+            {hasRole('SELLER') && <Link to="/crear-producto">Productos</Link>}
             {hasRole('SELLER') && <Link to="/crear-subasta">Nueva Subasta</Link>}
             {hasRole('ADMIN')  && <Link to="/admin/usuarios">Usuarios</Link>}
             {hasRole('ADMIN')  && <Link to="/admin/categorias">Categorias</Link>}
-            <Link to="/mi-historial">Mi Historial</Link>
-            <Link to="/notificaciones">Notificaciones</Link>
+            {hasRole('ADMIN')  && <Link to="/admin/disputas">Disputas</Link>}
+            {!hasRole('ADMIN') && <Link to="/mi-historial">Mi Historial</Link>}
+            {!hasRole('ADMIN') && <Link to="/notificaciones">Notificaciones</Link>}
             <span className="navbar-user">{user.nombre} ({user.roles?.join(', ')})</span>
             <button className="btn-logout" onClick={handleLogout}>Salir</button>
           </>

@@ -4,11 +4,13 @@ import com.subastas.subastas.dto.subasta.CancelacionRequestDTO;
 import com.subastas.subastas.dto.subasta.SubastaRequestDTO;
 import com.subastas.subastas.dto.subasta.SubastaResponseDTO;
 import com.subastas.subastas.entity.HistorialEstado;
+import com.subastas.subastas.entity.ImagenProducto;
 import com.subastas.subastas.entity.Producto;
 import com.subastas.subastas.entity.Puja;
 import com.subastas.subastas.entity.Subasta;
 import com.subastas.subastas.entity.Usuario;
 import com.subastas.subastas.enums.EstadoSubasta;
+import com.subastas.subastas.repository.DisputaRepository;
 import com.subastas.subastas.repository.HistorialEstadoRepository;
 import com.subastas.subastas.repository.ProductoRepository;
 import com.subastas.subastas.repository.PujaRepository;
@@ -37,6 +39,7 @@ public class SubastaService {
     private final PujaRepository pujaRepository;
     private final HistorialEstadoRepository historialEstadoRepository;
     private final NotificacionService notificacionService;
+    private final DisputaRepository disputaRepository;
 
     public SubastaResponseDTO crear(SubastaRequestDTO request, String emailVendedor) {
         if (request.getFechaInicio().isBefore(LocalDateTime.now())) {
@@ -151,8 +154,33 @@ public class SubastaService {
         ).map(this::toResponse).collect(Collectors.toList());
     }
 
-    public SubastaResponseDTO obtenerPorId(Long id) {
-        return toResponse(buscarSubasta(id));
+    public List<SubastaResponseDTO> listarMisSubastas(String emailVendedor) {
+        Usuario vendedor = buscarUsuario(emailVendedor);
+        return subastaRepository.findByVendedorId(vendedor.getId()).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public SubastaResponseDTO obtenerPorId(Long id, String emailUsuario) {
+        Subasta subasta = buscarSubasta(id);
+
+        if (emailUsuario != null) {
+            Usuario usuario = buscarUsuario(emailUsuario);
+            boolean esAdmin         = tieneRol(usuario, "ADMIN");
+            boolean esVendedorDuenio = subasta.getVendedor().getEmail().equals(emailUsuario);
+            if (esAdmin || esVendedorDuenio) {
+                return toResponse(subasta);
+            }
+        }
+
+        // Usuario normal o no autenticado: solo estados visibles
+        if (subasta.getEstado() != EstadoSubasta.ACTIVA &&
+            subasta.getEstado() != EstadoSubasta.PUBLICADA &&
+            subasta.getEstado() != EstadoSubasta.ADJUDICADA &&
+            subasta.getEstado() != EstadoSubasta.FINALIZADA) {
+            throw new RuntimeException("Subasta no disponible");
+        }
+        return toResponse(subasta);
     }
 
     public SubastaResponseDTO obtenerPublicoPorId(Long id) {
@@ -253,6 +281,12 @@ public class SubastaService {
 
     private SubastaResponseDTO toResponse(Subasta s) {
         long segundosRestantes = Math.max(0, ChronoUnit.SECONDS.between(LocalDateTime.now(), s.getFechaCierre()));
+        Long disputaId = disputaRepository.findBySubastaId(s.getId())
+                .map(d -> d.getId())
+                .orElse(null);
+        List<String> imagenesUrl = s.getProducto().getImagenes().stream()
+                .map(ImagenProducto::getUrl)
+                .collect(Collectors.toList());
         return new SubastaResponseDTO(
                 s.getId(),
                 s.getProducto().getId(),
@@ -270,7 +304,9 @@ public class SubastaService {
                 s.getFechaCierre(),
                 s.getDescripcion(),
                 s.getEstado().name(),
-                segundosRestantes
+                segundosRestantes,
+                imagenesUrl,
+                disputaId
         );
     }
 }
